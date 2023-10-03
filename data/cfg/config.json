@@ -1,0 +1,12 @@
+{
+    "SSID": "MaR testNet",
+    "deviceName": "AGNES - Terminal 1",
+    "dhcpOn": false,
+    "dns": "8.8.8.8",
+    "gw": "10.0.0.1",
+    "ip": "10.0.0.20",
+    "isAP": false,
+    "mac": "",
+    "mask": "255.255.255.0",
+    "password": "MaRnEt20"
+  }
