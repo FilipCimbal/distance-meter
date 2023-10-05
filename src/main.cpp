@@ -13,6 +13,7 @@
 #include "spiffs.h"
 #include "ModbusDriver.h"
 #include "SerialComm.h"
+#include "ModbusMotor.h"
 
 // git test
 
@@ -35,8 +36,10 @@ uint64_t uptime = 0;
 uint64_t time_span = 1000;
 SerialComm serialComm;
 ModbusDriver modbusDriver(serialComm);
+ModbusMotor modbusMotor(1, modbusDriver);
 
-Api _api(modbusDriver);
+
+Api _api(modbusDriver, modbusMotor);
 bool networkConnected = false;
 
 
@@ -75,7 +78,7 @@ void app_main()
     ESP_ERROR_CHECK(nvs_flash_init());
     serialComm.start();
     initialise_wifi(NULL);
-
+    wifi_apply();
     uptimeInit();
     //wifi_apply(deviceConfig);
 

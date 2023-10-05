@@ -117,6 +117,8 @@ esp_err_t post_handler(httpd_req_t *req)
     char buf[1024];
     int ret;
 
+    ESP_LOGI(TAG, "POST REQUEST from  - %s", req->uri);
+
     if (req->content_len > 1024)
     {
         ESP_LOGE(TAG, "Content is exceeded - %i", req->content_len);

@@ -6,7 +6,6 @@ bool ModbusDriver::changeAddress(uint8_t from, uint8_t to)
     return setHolding(from, 2, to);
 }
 
-
 bool ModbusDriver::setHolding(uint8_t addr, uint16_t registerNumber, uint16_t data)
 {
     uint8_t packet[32] = {0};
@@ -29,6 +28,33 @@ bool ModbusDriver::setHolding(uint8_t addr, uint16_t registerNumber, uint16_t da
 bool ModbusDriver::setHoldings(uint8_t addr, uint16_t start, vector<uint16_t> data)
 {
 
+    uint8_t packet[32] = {0};
+    uint8_t response[32] = {0};
+    uint16_t len = 0;
+    uint16_t count = data.size();
+
+    packet[0] = addr;
+    packet[1] = (uint8_t)MBFunction::WRITES_AO;
+    packet[2] = (start >> 8) & 0xFF;
+    packet[3] = start & 0xFF;
+    packet[4] = (count >> 8) & 0xFF;
+    packet[5] = count & 0xFF;
+    packet[6] = count * 2;
+
+    uint16_t i = 7;
+    for (auto item : data)
+    {
+        packet[i++] = (item >> 8) & 0xFF;
+        packet[i++] = item & 0xFF;        
+    }
+
+    crcAdd(packet, i);
+    i += 2;
+
+    ESP_LOG_BUFFER_HEX_LEVEL("HW_SEND", (const char *)packet, i, ESP_LOG_INFO);
+    len = serialComm.blockingRequest(packet, i, response);
+    ESP_LOG_BUFFER_HEX_LEVEL("HW_RECV", (const char *)response, len, ESP_LOG_INFO);
+
     return true;
 }
 
@@ -47,8 +73,9 @@ unordered_map<uint32_t, uint32_t> ModbusDriver::getHoldings(uint8_t addr, uint16
     packet[5] = count & 0xFF;
     crcAdd(packet, 6);
 
+    ESP_LOG_BUFFER_HEX_LEVEL("BR_SEND", (const char *)packet, 8, ESP_LOG_INFO);
     len = serialComm.blockingRequest(packet, 8, response);
-    ESP_LOG_BUFFER_HEX_LEVEL("BR_RECV", (const char *)response, len, ESP_LOG_DEBUG);
+    ESP_LOG_BUFFER_HEX_LEVEL("BR_RECV", (const char *)response, len, ESP_LOG_INFO);
 
     if ((len > 0) && (crcCheck(response, len)))
     {
@@ -83,6 +110,10 @@ bool ModbusDriver::crcCheck(uint8_t *data, int len)
 {
     uint16_t crc = crcCalc(data, len - 2);
     uint16_t crcCheck = ((data[len - 1] << 8) & 0xFF00) + (data[len - 2] & 0xFF);
+    if (crc != crcCheck)
+    {
+        ESP_LOGE("CRC", "CRCCheck ERROR MB calc %i in packet %i", crc, crcCheck);
+    }
     ESP_LOGD("CRC", "CRCCheck MB calc %i in packet %i", crc, crcCheck);
     return (crc == crcCheck);
 }
