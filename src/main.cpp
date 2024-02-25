@@ -14,6 +14,7 @@
 #include "ModbusDriver.h"
 #include "SerialComm.h"
 #include "ModbusMotor.h"
+#include "SonarMan.h"
 
 // git test
 
@@ -37,6 +38,7 @@ uint64_t time_span = 1000;
 SerialComm serialComm;
 ModbusDriver modbusDriver(serialComm);
 ModbusMotor modbusMotor(1, modbusDriver);
+SonarMan sonarProbeA(33, 34, 35);
 
 
 Api _api(modbusDriver, modbusMotor);
@@ -81,13 +83,23 @@ void app_main()
     wifi_apply();
     uptimeInit();
     //wifi_apply(deviceConfig);
+    sonarProbeA.init();
+
 
 
     xTaskCreate(&main_task, "main_task", 16384, NULL, 5, NULL);
 
     while (1)
     {
-        vTaskDelay(1000 / portTICK_RATE_MS);
+        vTaskDelay(20 / portTICK_RATE_MS);
+        if (sonarProbeA.measure())
+        {
+            ESP_LOGI(TAG, "MeasureA: %s", json(sonarProbeA.getLastMeasurement()).dump().c_str());
+        }
+        else
+        {
+            ESP_LOGI(TAG, "MeasureA failed");
+        }
         if (lastNetworkConnected != networkConnected)
         {
             lastNetworkConnected = networkConnected;
