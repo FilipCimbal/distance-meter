@@ -83,8 +83,8 @@ void app_main()
 
     while (1)
     {
-        vTaskDelay(20 / portTICK_RATE_MS);
-        if (sonarProbeA.measure(20, 10, 10000))
+        vTaskDelay(200 / portTICK_RATE_MS);
+        if (sonarProbeA.measure(30, 50, 10000))
         {
             ESP_LOGI(TAG, "Measure: %lli", sonarProbeA.getLastMeasurement().delta);
         }
