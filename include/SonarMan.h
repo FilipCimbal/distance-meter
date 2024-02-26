@@ -57,12 +57,15 @@ public:
     gpio_num_t drivePin; 
     gpio_num_t probeAPin;
     gpio_num_t probeBPin;
+    int64_t refTime = 0;
 
     int64_t refATime = 0;
     int64_t finishATime = 0;
 
     int64_t refBTime = 0;
-    int64_t finishBTime = 0;    
+    int64_t finishBTime = 0;   
+
+    SonicMeasurement measurement; 
 
 public:
     SonarMan(gpio_num_t _drivePin, gpio_num_t _probeAPin, gpio_num_t _probeBPin): drivePin(_drivePin), probeAPin(_probeAPin), probeBPin(_probeBPin) {}
@@ -71,6 +74,7 @@ public:
 
     bool init();
     bool measure(int64_t timeout = 1000000);
+    bool measure(uint8_t attempts, int64_t periodMs,  int64_t timeout = 1000000);
     SonicMeasurement getLastMeasurement();
 
     

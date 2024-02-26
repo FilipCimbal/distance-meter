@@ -31,7 +31,6 @@ static const char *TAG = "APP";
 
 SystemError systemError = SystemError::NONE;
 
-
 uint64_t uptimeStart = 0;
 uint64_t uptime = 0;
 uint64_t time_span = 1000;
@@ -40,12 +39,8 @@ ModbusDriver modbusDriver(serialComm);
 ModbusMotor modbusMotor(1, modbusDriver);
 SonarMan sonarProbeA(33, 34, 35);
 
-
 Api _api(modbusDriver, modbusMotor);
 bool networkConnected = false;
-
-
-
 
 void uptimeInit()
 {
@@ -57,14 +52,13 @@ void uptimeSync()
     uptime = (uint32_t)((uint64_t)time(nullptr) - uptimeStart);
 }
 
-
 void main_task(void *pvParameters)
 {
     int eventId = 0;
     while (1)
     {
         vTaskDelay(1000 / portTICK_RATE_MS);
-        //modbusDriver.getPhaseData(phaseData, uptime);
+        // modbusDriver.getPhaseData(phaseData, uptime);
         eventId++;
         // websocket_send_all_event("read", eventId, json(phaseData));
         uptimeSync();
@@ -82,23 +76,21 @@ void app_main()
     initialise_wifi(NULL);
     wifi_apply();
     uptimeInit();
-    //wifi_apply(deviceConfig);
+    // wifi_apply(deviceConfig);
     sonarProbeA.init();
-
-
 
     xTaskCreate(&main_task, "main_task", 16384, NULL, 5, NULL);
 
     while (1)
     {
         vTaskDelay(20 / portTICK_RATE_MS);
-        if (sonarProbeA.measure())
+        if (sonarProbeA.measure(20, 10, 10000))
         {
-            ESP_LOGI(TAG, "MeasureA: %s", json(sonarProbeA.getLastMeasurement()).dump().c_str());
+            ESP_LOGI(TAG, "Measure: %lli", sonarProbeA.getLastMeasurement().delta);
         }
         else
         {
-            ESP_LOGI(TAG, "MeasureA failed");
+            ESP_LOGI(TAG, "Measure problem: %s", json(sonarProbeA.getLastMeasurement()).dump().c_str());
         }
         if (lastNetworkConnected != networkConnected)
         {
@@ -115,7 +107,7 @@ void app_main()
 
         if (networkDisconnected == 60)
         {
-                //wifi_apply(deviceConfig);
+            // wifi_apply(deviceConfig);
         }
     }
 
