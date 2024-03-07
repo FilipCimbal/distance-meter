@@ -80,7 +80,7 @@ void app_main()
     sonarProbeA.init();
 
     xTaskCreate(&main_task, "main_task", 16384, NULL, 5, NULL);
-
+    uint16_t flow = 0;
     while (1)
     {
         vTaskDelay(20 / portTICK_RATE_MS);
@@ -109,6 +109,8 @@ void app_main()
         {
             // wifi_apply(deviceConfig);
         }
+        flow = modbusMotor.flowGet();
+        ESP_LOGI("FLW", "Flow read: %u", flow);
     }
 
     // curl -H "Content-Type: text/xml" --data-binary @firmware.bin http://192.168.123.14/update
