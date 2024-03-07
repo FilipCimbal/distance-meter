@@ -43,7 +43,7 @@ static void IRAM_ATTR gpio_isr_a_handler(void *arg)
     {
         source->refATime = esp_timer_get_time();
     }
-    if ((source->refATime > 0) && (!gpio_get_level(source->probeAPin)))
+    if ((source->refATime != 0) && (!gpio_get_level(source->probeAPin)))
     {
         source->finishATime = esp_timer_get_time();
     }
@@ -56,7 +56,7 @@ static void IRAM_ATTR gpio_isr_b_handler(void *arg)
     {
         source->refBTime = esp_timer_get_time();
     }
-    if ((source->refBTime > 0) && (!gpio_get_level(source->probeBPin)))
+    if ((source->refBTime != 0) && (!gpio_get_level(source->probeBPin)))
     {
         source->finishBTime = esp_timer_get_time();
     }
