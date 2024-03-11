@@ -1,12 +1,12 @@
 {
-    "SSID": "agnes terminal",
-    "deviceName": "AGNES - Terminal 1",
-    "dhcpOn": true,
-    "dns": "8.8.8.8",
-    "gw": "10.0.0.1",
-    "ip": "10.0.0.1",
-    "isAP": true,
-    "mac": "",
-    "mask": "255.255.255.0",
-    "password": "123456789"
-  }
+  "SSID": "DistanceMeter",
+  "deviceName": "SDM 01",
+  "dhcpOn": false,
+  "dns": "8.8.8.8",
+  "gw": "10.0.0.1",
+  "ip": "10.0.0.20",
+  "isAP": false,
+  "mac": "",
+  "mask": "255.255.255.0",
+  "password": "passpass"
+}

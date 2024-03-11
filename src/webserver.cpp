@@ -232,10 +232,8 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
         {
             server = start_webserver();
         }
-        networkConnected = true;
         break;
     case SYSTEM_EVENT_STA_DISCONNECTED:
-        networkConnected = false;
         ESP_LOGI(TAG, "SYSTEM_EVENT_STA_DISCONNECTED");
         ESP_ERROR_CHECK(esp_wifi_connect());
 
@@ -291,7 +289,6 @@ void wifi_ap_init()
     {
         server = start_webserver();
     }
-    networkConnected = true;
 }
 
 void wifi_sta_init(const char *ssid, const char *pass)
