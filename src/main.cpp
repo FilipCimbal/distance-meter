@@ -59,13 +59,8 @@ void app_main()
     uint16_t flow = 0;
     while (1) // hlavni smycka aplikace. TODO - nahradit za FreeRTOS Task
     {
-<<<<<<< HEAD
-        vTaskDelay(200 / portTICK_RATE_MS);
-        if (sonarProbeA.measure(30, 50, 10000))
-=======
         vTaskDelay(20 / portTICK_RATE_MS);
         if (sonarProbe.measure(20, 10, 10000))
->>>>>>> origin/main
         {
             ESP_LOGI(TAG, "Measure: %lli", sonarProbe.getLastMeasurement().delta);
         }
