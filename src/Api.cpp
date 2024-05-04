@@ -25,6 +25,26 @@ ResponseApi Api::requestResolver(std::string endpoint, json args)
         {
             modbusMotor.flowRequest(args.at("data"));
         }
+        if (endpoint == "speed")
+        {
+            modbusMotor.speedRequest(args.at("data"));
+        }
+        if (endpoint == "measure")
+        {
+            uint16_t flow = modbusMotor.flowGet();
+            float speed = (float)flow / 40.6944f;
+            if (sonarMan.measure(50, 100, 100000))
+            {
+                SonicMeasurement measurement = sonarMan.getLastMeasurement();
+                response.args = json{{"flow", flow}, {"echo", measurement.delta}, {"speed", speed}};
+            }
+            else
+            {
+                response.args = json{{"flow", flow}, {"echo", nullptr}, {"speed", speed}};
+                response.code = ResponseError::ERROR;
+            }
+            
+        }
         if (endpoint == "init")
         {
             modbusMotor.init();

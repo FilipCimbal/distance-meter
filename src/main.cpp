@@ -29,87 +29,52 @@ extern "C"
 
 static const char *TAG = "APP";
 
-SystemError systemError = SystemError::NONE;
+SystemError systemError = SystemError::NONE; // inicializace stavu pro REST odpovedi
 
-uint64_t uptimeStart = 0;
-uint64_t uptime = 0;
-uint64_t time_span = 1000;
-SerialComm serialComm;
-ModbusDriver modbusDriver(serialComm);
-ModbusMotor modbusMotor(1, modbusDriver);
-SonarMan sonarProbeA(33, 34, 35);
+SerialComm serialComm; // objekt zajistujici komunikaci pomoci UART
+ModbusDriver modbusDriver(serialComm); // zjednodusena implementace ModBus protokolu RTU
+ModbusMotor modbusMotor(1, modbusDriver); // zakladni obsluha motoru pomoci komunikace ModBus
+SonarMan sonarProbe(33, 34, 35); // Objekt pro manipuaci se senzory. Podporuje jeden trigger a dva vstupy pro ECHO
 
-Api _api(modbusDriver, modbusMotor);
-bool networkConnected = false;
+Api _api(modbusDriver, modbusMotor, sonarProbe); // jednoduche REST API pro rizeni a snimani
 
-void uptimeInit()
-{
-    uptimeStart = (uint64_t)time(nullptr);
-}
 
-void uptimeSync()
-{
-    uptime = (uint32_t)((uint64_t)time(nullptr) - uptimeStart);
-}
 
-void main_task(void *pvParameters)
-{
-    int eventId = 0;
-    while (1)
-    {
-        vTaskDelay(1000 / portTICK_RATE_MS);
-        // modbusDriver.getPhaseData(phaseData, uptime);
-        eventId++;
-        // websocket_send_all_event("read", eventId, json(phaseData));
-        uptimeSync();
-    }
-}
+
 
 void app_main()
 {
-    bool lastNetworkConnected = !networkConnected;
-    uint8_t networkDisconnected = 0;
+
     spiffs_init();
 
     ESP_ERROR_CHECK(nvs_flash_init());
     serialComm.start();
     initialise_wifi(NULL);
     wifi_apply();
-    uptimeInit();
-    // wifi_apply(deviceConfig);
-    sonarProbeA.init();
+    // wifi_apply(deviceConfig); TODO - podpora ulozene konfigurace na SPIFFS
 
-    xTaskCreate(&main_task, "main_task", 16384, NULL, 5, NULL);
+    sonarProbe.init();
+    modbusMotor.init();
 
-    while (1)
+    uint16_t flow = 0;
+    while (1) // hlavni smycka aplikace. TODO - nahradit za FreeRTOS Task
     {
+<<<<<<< HEAD
         vTaskDelay(200 / portTICK_RATE_MS);
         if (sonarProbeA.measure(30, 50, 10000))
+=======
+        vTaskDelay(20 / portTICK_RATE_MS);
+        if (sonarProbe.measure(20, 10, 10000))
+>>>>>>> origin/main
         {
-            ESP_LOGI(TAG, "Measure: %lli", sonarProbeA.getLastMeasurement().delta);
+            ESP_LOGI(TAG, "Measure: %lli", sonarProbe.getLastMeasurement().delta);
         }
         else
         {
-            ESP_LOGI(TAG, "Measure problem: %s", json(sonarProbeA.getLastMeasurement()).dump().c_str());
-        }
-        if (lastNetworkConnected != networkConnected)
-        {
-            lastNetworkConnected = networkConnected;
-        }
-        if (networkConnected)
-        {
-            networkDisconnected = 0;
-        }
-        else
-        {
-            networkDisconnected++;
+            ESP_LOGI(TAG, "Measure problem: %s", json(sonarProbe.getLastMeasurement()).dump().c_str());
         }
 
-        if (networkDisconnected == 60)
-        {
-            // wifi_apply(deviceConfig);
-        }
+        flow = modbusMotor.flowGet();
+        ESP_LOGI("FLW", "Flow read: %u", flow);
     }
-
-    // curl -H "Content-Type: text/xml" --data-binary @firmware.bin http://192.168.123.14/update
 }

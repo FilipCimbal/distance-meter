@@ -15,7 +15,7 @@ static const char *TAG = "SERIAL_COMM";
 
 void SerialComm::dataReceiver(uint8_t *data, int len)
 {
-	ESP_LOG_BUFFER_HEXDUMP(TAG, data, len, ESP_LOG_DEBUG);
+	ESP_LOG_BUFFER_HEXDUMP(TAG, data, len, ESP_LOG_INFO);
 	if (!responseFinish)
 	{
 		memset(recvBuffer, 0, sizeof(recvBuffer));
@@ -41,11 +41,11 @@ void serial_listener(void *pvParameters)
 	{
 		memset(recvData, 0, BUF_SIZE);
 		int len = uart_read_bytes(SERIAL_CONN_PORT, recvData, BUF_SIZE,
-								  300 / portTICK_RATE_MS);
+								  30 / portTICK_RATE_MS);
 
 		if (len > 0)
 		{
-			ESP_LOG_BUFFER_HEX_LEVEL("RAW_DATA", (const char *)recvData, len, ESP_LOG_INFO);
+			//ESP_LOG_BUFFER_HEX_LEVEL("RAW_DATA", (const char *)recvData, len, ESP_LOG_INFO);
 
 			params->dataReceiver(recvData, len);
 		}
@@ -80,7 +80,7 @@ size_t SerialComm::sendPacket(uint8_t *data, size_t len)
 uint16_t SerialComm::blockingRequest(uint8_t *data, size_t len, uint8_t *response)
 {
 	g_num_mutex.lock();
-	timeoutTime = (uint64_t)time(NULL) + 2;
+	timeoutTime = (uint64_t)time(NULL) + 20;
 	pending = false;
 	sendPacket(data, len);
 	while (timeoutTime > (uint64_t)time(NULL))

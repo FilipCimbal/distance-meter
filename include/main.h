@@ -8,4 +8,3 @@
 
 
 extern Api _api;
-extern bool networkConnected;

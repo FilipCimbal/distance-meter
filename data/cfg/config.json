@@ -1,6 +1,6 @@
 {
-    "SSID": "MaR testNet",
-    "deviceName": "AGNES - Terminal 1",
+    "SSID": "DistanceMeter",
+    "deviceName": "SDM 01",
     "dhcpOn": false,
     "dns": "8.8.8.8",
     "gw": "10.0.0.1",
@@ -8,5 +8,5 @@
     "isAP": false,
     "mac": "",
     "mask": "255.255.255.0",
-    "password": "MaRnEt20"
+    "password": "passpass"
   }

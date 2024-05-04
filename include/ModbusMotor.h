@@ -32,6 +32,7 @@ public:
 
     bool init();
     void flowRequest(uint16_t flow);
+    void speedRequest(uint16_t speed);
     uint16_t flowGet();
     void heartBeat();
     
