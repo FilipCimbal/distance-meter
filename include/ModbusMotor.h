@@ -31,8 +31,8 @@ public:
     ~ModbusMotor() {}
 
     bool init();
-    void flowRequest(uint16_t flow);
-    void speedRequest(uint16_t speed);
+    void flowRequest(float flow);
+    void speedRequest(float speed);
     uint16_t flowGet();
     void heartBeat();
     

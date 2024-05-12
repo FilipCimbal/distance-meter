@@ -80,7 +80,7 @@ size_t SerialComm::sendPacket(uint8_t *data, size_t len)
 uint16_t SerialComm::blockingRequest(uint8_t *data, size_t len, uint8_t *response)
 {
 	g_num_mutex.lock();
-	timeoutTime = (uint64_t)time(NULL) + 20;
+	timeoutTime = (uint64_t)time(NULL) + 1;
 	pending = false;
 	sendPacket(data, len);
 	while (timeoutTime > (uint64_t)time(NULL))

@@ -29,13 +29,13 @@ export default class ApiConnector {
 
     async setSpeed(speed: number) {
         const sendData = {data: (speed * 1)}
-        console.warn('set speed', this._url + '/speed', sendData)
-        return (await this.http.post(this._url + '/speed', sendData)).data
+        console.warn('set speed', this._url + '/api/speed', sendData)
+        return (await this.http.post(this._url + '/api/speed', sendData)).data
     }
 
     async getFlow() {
-        console.warn('getting', this._url + '/measure')
-        return (await this.http.get(this._url + '/measure')).data
+        console.warn('getting', this._url + '/api/measure')
+        return (await this.http.get(this._url + '/api/measure')).data
     }
 
 

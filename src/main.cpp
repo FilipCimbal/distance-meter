@@ -31,16 +31,12 @@ static const char *TAG = "APP";
 
 SystemError systemError = SystemError::NONE; // inicializace stavu pro REST odpovedi
 
-SerialComm serialComm; // objekt zajistujici komunikaci pomoci UART
-ModbusDriver modbusDriver(serialComm); // zjednodusena implementace ModBus protokolu RTU
+SerialComm serialComm;                    // objekt zajistujici komunikaci pomoci UART
+ModbusDriver modbusDriver(serialComm);    // zjednodusena implementace ModBus protokolu RTU
 ModbusMotor modbusMotor(1, modbusDriver); // zakladni obsluha motoru pomoci komunikace ModBus
-SonarMan sonarProbe(33, 34, 35); // Objekt pro manipuaci se senzory. Podporuje jeden trigger a dva vstupy pro ECHO
+SonarMan sonarProbe(33, 34, 35);          // Objekt pro manipuaci se senzory. Podporuje jeden trigger a dva vstupy pro ECHO
 
 Api _api(modbusDriver, modbusMotor, sonarProbe); // jednoduche REST API pro rizeni a snimani
-
-
-
-
 
 void app_main()
 {
@@ -60,7 +56,7 @@ void app_main()
     while (1) // hlavni smycka aplikace. TODO - nahradit za FreeRTOS Task
     {
         vTaskDelay(20 / portTICK_RATE_MS);
-        if (sonarProbe.measure(20, 10, 10000))
+        if (sonarProbe.measure(2, 10, 1000))
         {
             ESP_LOGI(TAG, "Measure: %lli", sonarProbe.getLastMeasurement().delta);
         }
@@ -69,7 +65,14 @@ void app_main()
             ESP_LOGI(TAG, "Measure problem: %s", json(sonarProbe.getLastMeasurement()).dump().c_str());
         }
 
-        flow = modbusMotor.flowGet();
-        ESP_LOGI("FLW", "Flow read: %u", flow);
+        try
+        {
+            flow = modbusMotor.flowGet();
+            ESP_LOGI(TAG, "Flow read: %u", flow);
+        }
+        catch (const std::exception &e)
+        {
+            ESP_LOGI(TAG, "Flow read error %s", e.what());
+        }
     }
 }

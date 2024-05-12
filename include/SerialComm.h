@@ -17,8 +17,8 @@
 #define delay(ms) (vTaskDelay(ms / portTICK_RATE_MS))
 
 #define SERIAL_CONN_PORT    (UART_NUM_1)
-#define SERIAL_CONN_TXD     (GPIO_NUM_19)
-#define SERIAL_CONN_RXD     (GPIO_NUM_17)
+#define SERIAL_CONN_TXD     (GPIO_NUM_17)
+#define SERIAL_CONN_RXD     (GPIO_NUM_19)
 #define SERIAL_CONN_485     (GPIO_NUM_4)
 #define SERIAL_CONN_RTS     (UART_PIN_NO_CHANGE)
 #define SERIAL_CONN_CTS     (UART_PIN_NO_CHANGE)

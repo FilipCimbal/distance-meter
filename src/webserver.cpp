@@ -16,10 +16,10 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "main.h"
+#include "web_content.h"
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
-
 
 static const char *TAG = "APP";
 
@@ -37,6 +37,41 @@ vector<string> split(const string &s, char delim)
         result.push_back(item);
     }
     return result;
+}
+
+static esp_err_t set_content_type_from_file(httpd_req_t *req, const std::string &uri)
+{
+    const std::unordered_map<std::string, const char *> types = {
+        {".pdf", "application/pdf"},
+        {".html", "text/html"},
+        {".jpeg", "image/jpeg"},
+        {".css", "text/css"},
+        {".js", "application/javascript"},
+        {".svg", "image/svg+xml"}};
+
+    if (uri.back() == '/')
+        return httpd_resp_set_type(req, "text/html");
+
+    std::size_t found = uri.find_last_of(".");
+
+    std::string ext;
+    if (found == std::string::npos)
+    {
+        return httpd_resp_set_type(req, "text/plain");
+    }
+    else
+    {
+        ext = uri.substr(found);
+    }
+
+    try
+    {
+        return httpd_resp_set_type(req, types.at(ext));
+    }
+    catch (std::out_of_range &)
+    {
+        return httpd_resp_set_type(req, "text/plain");
+    }
 }
 
 void cors(httpd_req_t *request)
@@ -112,6 +147,34 @@ esp_err_t http_404_error_handler(httpd_req_t *req, httpd_err_code_t err)
     return ESP_FAIL;
 }
 
+static esp_err_t static_web_handler(httpd_req_t *req)
+{
+    try
+    {
+        std::string uri = static_cast<const char *>(req->uri);
+        std::string filePath = uri;
+        std::string query = "";
+
+        auto pos = uri.find("?");
+        if (pos != std::string::npos)
+        {
+            query = uri.substr(pos + 1);
+            filePath = uri.substr(0, pos);
+        }
+
+        auto file = getEmbededFile(filePath);
+        set_content_type_from_file(req, filePath);
+        httpd_resp_set_hdr(req, "Connection", "close");
+        httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
+        httpd_resp_send(req, reinterpret_cast<const char *>(file.data), file.len);
+    }
+    catch (std::out_of_range &ex)
+    {
+        httpd_resp_send_404(req);
+    }
+    return ESP_OK;
+}
+
 esp_err_t post_handler(httpd_req_t *req)
 {
     char buf[1024];
@@ -164,23 +227,32 @@ esp_err_t get_handler(httpd_req_t *req)
 }
 
 httpd_uri_t getUri = {
-    .uri = "/*",
+    .uri = "/api/*",
     .method = HTTP_GET,
     .handler = get_handler,
     .user_ctx = NULL};
 
 httpd_uri_t postUri = {
-    .uri = "/*",
+    .uri = "/api/*",
     .method = HTTP_POST,
     .handler = post_handler,
     .user_ctx = NULL};
 
 httpd_uri_t optionUri = {
-    .uri = "/*",
+    .uri = "/api/*",
     .method = HTTP_OPTIONS,
     .handler = post_handler,
     .user_ctx = NULL};
 
+httpd_uri_t static_web = {
+    .uri = "/*",
+    .method = HTTP_GET,
+    .handler = static_web_handler,
+    .user_ctx = NULL,
+    .is_websocket = false,
+    .handle_ws_control_frames = false,
+    .supported_subprotocol = NULL,
+};
 
 httpd_handle_t start_webserver(void)
 {
@@ -199,6 +271,7 @@ httpd_handle_t start_webserver(void)
         httpd_register_uri_handler(server, &getUri);
         httpd_register_uri_handler(server, &postUri);
         httpd_register_uri_handler(server, &optionUri);
+        httpd_register_uri_handler(server, &static_web);
 
         return server;
     }
@@ -268,7 +341,7 @@ void wifi_ap_init()
     wifi_config.ap.authmode = WIFI_AUTH_WPA2_PSK;
     wifi_config.ap.max_connection = 3;
 
-    strcpy((char *)wifi_config.ap.ssid, "DistanceMeter");
+    strcpy((char *)wifi_config.ap.ssid, "FlowMeter");
 
     strcpy((char *)wifi_config.ap.password, "atreaatrea");
     tcpip_adapter_ip_info_t ipAddressInfo;

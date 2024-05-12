@@ -55,6 +55,11 @@ bool ModbusDriver::setHoldings(uint8_t addr, uint16_t start, vector<uint16_t> da
     len = serialComm.blockingRequest(packet, i, response);
     ESP_LOG_BUFFER_HEX_LEVEL("HW_RECV", (const char *)response, len, ESP_LOG_INFO);
 
+    if (len == 0)
+    {
+        throw std::runtime_error("setHoldings response is NULL");
+    }
+
     return true;
 }
 
@@ -94,6 +99,10 @@ unordered_map<uint32_t, uint32_t> ModbusDriver::getHoldings(uint8_t addr, uint16
             retval[start++] = ((response[3 + i] << 8) & 0xFF00) + response[4 + i];
             i += 2;
         }
+    }
+    else
+    {
+        throw std::runtime_error("Serial response is NULL");
     }
 
     return retval;

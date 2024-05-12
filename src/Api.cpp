@@ -11,45 +11,44 @@ ResponseApi Api::requestResolver(std::string endpoint, json args)
     ResponseApi response;
     try
     {
-        if (endpoint == "read")
+        if (endpoint == "api/read")
         {
             response.args = json(modbusDriver.getHoldings(args.at("address"), args.at("start"), args.at("count")));
             // response.message = "Reads " + string(args.at("count")) + " registers from " + string(args.at("start"));
         }
-        if (endpoint == "write")
+        if (endpoint == "api/write")
         {
             response.args = json(modbusDriver.setHoldings(args.at("address"), args.at("start"), args.at("data")));
             // response.message = "Reads " + string(args.at("count")) + " registers from " + string(args.at("start"));
         }
-        if (endpoint == "flow")
+        if (endpoint == "api/flow")
         {
             modbusMotor.flowRequest(args.at("data"));
         }
-        if (endpoint == "speed")
+        if (endpoint == "api/speed")
         {
             modbusMotor.speedRequest(args.at("data"));
         }
-        if (endpoint == "measure")
+        if (endpoint == "api/measure")
         {
-            uint16_t flow = modbusMotor.flowGet();
-            float speed = (float)flow / 40.6944f;
-            if (sonarMan.measure(50, 100, 100000))
+            try
             {
+                uint16_t flow = modbusMotor.flowGet();
+                float speed = (float)flow / 40.6944f;
                 SonicMeasurement measurement = sonarMan.getLastMeasurement();
                 response.args = json{{"flow", flow}, {"echo", measurement.delta}, {"speed", speed}};
             }
-            else
+            catch (const std::exception &e)
             {
-                response.args = json{{"flow", flow}, {"echo", nullptr}, {"speed", speed}};
+                response.args = json{{"flow", 0}, {"echo", nullptr}, {"speed", 0}};
                 response.code = ResponseError::ERROR;
             }
-            
         }
-        if (endpoint == "init")
+        if (endpoint == "api/init")
         {
             modbusMotor.init();
         }
-        if (endpoint == "reboot")
+        if (endpoint == "api/reboot")
         {
             // esp_restart();
         }
