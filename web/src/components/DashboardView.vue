@@ -4,13 +4,25 @@
       {{ Title }}
     </div>
     <div class="slidecontainer">
-      <input type="range" min="0" max="10" step="0.1" v-model="flowRequest" class="slider">
-      <input class="input_1" v-model="flowRequest"> m/s
+      <input type="range" min="0" max="10" step="0.1" v-model="flowRequest" class="slider">      
     </div>
-    <div>
-      <p>Naměřená rychlost proudění: {{ speedCurrent }} m/s</p>
-      <p>Naměřený průtok: {{ flowCurrent }} m<sup>3</sup>/h</p>
-
+    <br><br>
+    <br><br>
+    <div class="leftDiv">
+      <table>
+      <tr>
+      <td class="tabCell">Nastavená rychlost proudění:</td>
+      <td class="tabValueCell"><input class="input_1" v-model="flowRequest"> m/s</td>
+      </tr>        
+      <tr>
+      <td class="tabCell">Naměřená rychlost proudění:</td>
+      <td class="tabValueCell"> {{ speedCurrent.toFixed(2) }} m/s</td>
+      </tr>
+      <tr>
+      <td class="tabCell">Naměřený průtok: </td>        
+      <td class="tabValueCell">{{ flowCurrent }} m<sup>3</sup>/h</td>
+      </tr>
+      </table>
     </div>
   </div>
 </template>
@@ -107,7 +119,7 @@ a {
   appearance: none;
   width: 100%;
   /* Full-width */
-  height: 25px;
+  height: 15px;
   /* Specified height */
   background: #d3d3d3;
   /* Grey background */
@@ -150,5 +162,23 @@ a {
   /* Green background */
   cursor: pointer;
   /* Cursor on hover */
+}
+
+.leftDiv {
+  text-align: left;
+
+}
+
+.tabCell
+{
+  width: 300px;
+  font-weight: bold;
+  font-size: large;
+}
+
+.tabValueCell
+{
+  font-weight: normal;
+  font-size: large;
 }
 </style>
